@@ -1,67 +1,38 @@
-import { useState, useEffect } from 'react'
-import { supabase, type Profile, type Company, type Contact, type Opportunity, type Task } from '@/lib/supabase'
+import { useState, useCallback } from 'react'
+import { supabase, type Company, type Contact, type Opportunity, type Task } from '@/lib/supabase'
 
-// Hook para obtener el perfil del usuario actual
-export function useProfile() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    getProfile()
-  }, [])
-
-  async function getProfile() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setLoading(false)
-        return
-      }
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      if (error) throw error
-      setProfile(data)
-    } catch (error) {
-      // Error loading profile
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return { profile, loading, refetch: getProfile }
-}
-
-// Hook para manejar empresas
-export function useCompanies() {
+export function useSupabase() {
   const [companies, setCompanies] = useState<Company[]>([])
-  const [loading, setLoading] = useState(true)
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    fetchCompanies()
-  }, [])
-
-  async function fetchCompanies() {
+  // Companies
+  const fetchCompanies = useCallback(async () => {
     try {
+      setLoading(true)
       const { data, error } = await supabase
         .from('companies')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        // Error fetching companies
+        return []
+      }
+
       setCompanies(data || [])
+      return data || []
     } catch (error) {
-      // Error loading companies
+      // Error in fetchCompanies
+      return []
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  async function createCompany(company: Omit<Company, 'id' | 'created_at' | 'updated_at'>) {
+  const createCompany = useCallback(async (company: Omit<Company, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data, error } = await supabase
         .from('companies')
@@ -69,345 +40,278 @@ export function useCompanies() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        // Error creating company
+        return null
+      }
+
       setCompanies(prev => [data, ...prev])
       return data
     } catch (error) {
-      // Error creating company
-      throw error
+      // Error in createCompany
+      return null
     }
-  }
-
-  async function updateCompany(id: string, updates: Partial<Company>) {
-    try {
-      const { data, error } = await supabase
-        .from('companies')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single()
-
-      if (error) throw error
-      setCompanies(prev => prev.map(company => company.id === id ? data : company))
-      return data
-    } catch (error) {
-      // Error updating company
-      throw error
-    }
-  }
-
-  async function deleteCompany(id: string) {
-    try {
-      const { error } = await supabase
-        .from('companies')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      setCompanies(prev => prev.filter(company => company.id !== id))
-    } catch (error) {
-      // Error deleting company
-      throw error
-    }
-  }
-
-  return {
-    companies,
-    loading,
-    createCompany,
-    updateCompany,
-    deleteCompany,
-    refetch: fetchCompanies
-  }
-}
-
-// Hook para manejar contactos
-export function useContacts() {
-  const [contacts, setContacts] = useState<Contact[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchContacts()
   }, [])
 
-  async function fetchContacts() {
+  // Contacts
+  const fetchContacts = useCallback(async () => {
     try {
+      setLoading(true)
       const { data, error } = await supabase
         .from('contacts')
         .select(`
           *,
-          companies(name)
+          companies (
+            id,
+            name
+          )
         `)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        // Error fetching contacts
+        return []
+      }
+
       setContacts(data || [])
+      return data || []
     } catch (error) {
-      // Error loading contacts
+      // Error in fetchContacts
+      return []
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  async function createContact(contact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>) {
+  const createContact = useCallback(async (contact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data, error } = await supabase
         .from('contacts')
         .insert([contact])
         .select(`
           *,
-          companies(name)
+          companies (
+            id,
+            name
+          )
         `)
         .single()
 
-      if (error) throw error
+      if (error) {
+        // Error creating contact
+        return null
+      }
+
       setContacts(prev => [data, ...prev])
       return data
     } catch (error) {
-      // Error creating contact
-      throw error
+      // Error in createContact
+      return null
     }
-  }
-
-  async function updateContact(id: string, updates: Partial<Contact>) {
-    try {
-      const { data, error } = await supabase
-        .from('contacts')
-        .update(updates)
-        .eq('id', id)
-        .select(`
-          *,
-          companies(name)
-        `)
-        .single()
-
-      if (error) throw error
-      setContacts(prev => prev.map(contact => contact.id === id ? data : contact))
-      return data
-    } catch (error) {
-      // Error updating contact
-      throw error
-    }
-  }
-
-  async function deleteContact(id: string) {
-    try {
-      const { error } = await supabase
-        .from('contacts')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      setContacts(prev => prev.filter(contact => contact.id !== id))
-    } catch (error) {
-      // Error deleting contact
-      throw error
-    }
-  }
-
-  return {
-    contacts,
-    loading,
-    createContact,
-    updateContact,
-    deleteContact,
-    refetch: fetchContacts
-  }
-}
-
-// Hook para manejar oportunidades
-export function useOpportunities() {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchOpportunities()
   }, [])
 
-  async function fetchOpportunities() {
+  // Opportunities
+  const fetchOpportunities = useCallback(async () => {
     try {
+      setLoading(true)
       const { data, error } = await supabase
         .from('opportunities')
         .select(`
           *,
-          companies(name),
-          contacts(first_name, last_name)
+          companies (
+            id,
+            name
+          ),
+          contacts (
+            id,
+            first_name,
+            last_name
+          )
         `)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        // Error fetching opportunities
+        return []
+      }
+
       setOpportunities(data || [])
+      return data || []
     } catch (error) {
-      // Error loading opportunities
+      // Error in fetchOpportunities
+      return []
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  async function createOpportunity(opportunity: Omit<Opportunity, 'id' | 'created_at' | 'updated_at'>) {
+  const createOpportunity = useCallback(async (opportunity: Omit<Opportunity, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data, error } = await supabase
         .from('opportunities')
         .insert([opportunity])
         .select(`
           *,
-          companies(name),
-          contacts(first_name, last_name)
+          companies (
+            id,
+            name
+          ),
+          contacts (
+            id,
+            first_name,
+            last_name
+          )
         `)
         .single()
 
-      if (error) throw error
+      if (error) {
+        // Error creating opportunity
+        return null
+      }
+
       setOpportunities(prev => [data, ...prev])
       return data
     } catch (error) {
-      // Error creating opportunity
-      throw error
+      // Error in createOpportunity
+      return null
     }
-  }
-
-  async function updateOpportunity(id: string, updates: Partial<Opportunity>) {
-    try {
-      const { data, error } = await supabase
-        .from('opportunities')
-        .update(updates)
-        .eq('id', id)
-        .select(`
-          *,
-          companies(name),
-          contacts(first_name, last_name)
-        `)
-        .single()
-
-      if (error) throw error
-      setOpportunities(prev => prev.map(opportunity => opportunity.id === id ? data : opportunity))
-      return data
-    } catch (error) {
-      // Error updating opportunity
-      throw error
-    }
-  }
-
-  async function deleteOpportunity(id: string) {
-    try {
-      const { error } = await supabase
-        .from('opportunities')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      setOpportunities(prev => prev.filter(opportunity => opportunity.id !== id))
-    } catch (error) {
-      // Error deleting opportunity
-      throw error
-    }
-  }
-
-  return {
-    opportunities,
-    loading,
-    createOpportunity,
-    updateOpportunity,
-    deleteOpportunity,
-    refetch: fetchOpportunities
-  }
-}
-
-// Hook para manejar tareas
-export function useTasks() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchTasks()
   }, [])
 
-  async function fetchTasks() {
+  // Tasks
+  const fetchTasks = useCallback(async () => {
     try {
+      setLoading(true)
       const { data, error } = await supabase
         .from('tasks')
         .select(`
           *,
-          companies(name),
-          contacts(first_name, last_name),
-          opportunities(title)
+          companies (
+            id,
+            name
+          ),
+          contacts (
+            id,
+            first_name,
+            last_name
+          ),
+          opportunities (
+            id,
+            title
+          )
         `)
-        .order('due_date', { ascending: true })
+        .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        // Error fetching tasks
+        return []
+      }
+
       setTasks(data || [])
+      return data || []
     } catch (error) {
-      // Error loading tasks
+      // Error in fetchTasks
+      return []
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  async function createTask(task: Omit<Task, 'id' | 'created_at' | 'updated_at'>) {
+  const createTask = useCallback(async (task: Omit<Task, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const { data, error } = await supabase
         .from('tasks')
         .insert([task])
         .select(`
           *,
-          companies(name),
-          contacts(first_name, last_name),
-          opportunities(title)
+          companies (
+            id,
+            name
+          ),
+          contacts (
+            id,
+            first_name,
+            last_name
+          ),
+          opportunities (
+            id,
+            title
+          )
         `)
         .single()
 
-      if (error) throw error
+      if (error) {
+        // Error creating task
+        return null
+      }
+
       setTasks(prev => [data, ...prev])
       return data
     } catch (error) {
-      // Error creating task
-      throw error
+      // Error in createTask
+      return null
     }
-  }
+  }, [])
 
-  async function updateTask(id: string, updates: Partial<Task>) {
+  const updateTaskStatus = useCallback(async (taskId: string, status: Task['status']) => {
     try {
       const { data, error } = await supabase
         .from('tasks')
-        .update(updates)
-        .eq('id', id)
+        .update({ status })
+        .eq('id', taskId)
         .select(`
           *,
-          companies(name),
-          contacts(first_name, last_name),
-          opportunities(title)
+          companies (
+            id,
+            name
+          ),
+          contacts (
+            id,
+            first_name,
+            last_name
+          ),
+          opportunities (
+            id,
+            title
+          )
         `)
         .single()
 
-      if (error) throw error
-      setTasks(prev => prev.map(task => task.id === id ? data : task))
+      if (error) {
+        // Error updating task status
+        return null
+      }
+
+      setTasks(prev => prev.map(task => task.id === taskId ? data : task))
       return data
     } catch (error) {
-      // Error updating task
-      throw error
+      // Error in updateTaskStatus
+      return null
     }
-  }
-
-  async function deleteTask(id: string) {
-    try {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      setTasks(prev => prev.filter(task => task.id !== id))
-    } catch (error) {
-      // Error deleting task
-      throw error
-    }
-  }
+  }, [])
 
   return {
+    // Data
+    companies,
+    contacts,
+    opportunities,
     tasks,
     loading,
+    
+    // Companies
+    fetchCompanies,
+    createCompany,
+    
+    // Contacts
+    fetchContacts,
+    createContact,
+    
+    // Opportunities
+    fetchOpportunities,
+    createOpportunity,
+    
+    // Tasks
+    fetchTasks,
     createTask,
-    updateTask,
-    deleteTask,
-    refetch: fetchTasks
+    updateTaskStatus,
   }
 } 

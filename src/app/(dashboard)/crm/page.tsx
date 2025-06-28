@@ -1,92 +1,54 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useAuth } from "@/components/auth/auth-provider"
-import { useCompanies, useContacts, useOpportunities, useTasks } from "@/hooks/use-supabase"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { 
-  Building2, 
   Users, 
-  Target, 
-  CheckSquare, 
-  TrendingUp,
-  Plus
-} from "lucide-react"
-import Link from "next/link"
+  Building2, 
+  Target,
+  CheckCircle2,
+  Clock,
+  AlertCircle
+} from 'lucide-react'
+import { useSupabase } from '@/hooks/use-supabase'
+import { useEffect, useState } from 'react'
 
-export default function CRMDashboard() {
-  const { user } = useAuth()
-  const { companies, loading: companiesLoading } = useCompanies()
-  const { contacts, loading: contactsLoading } = useContacts()
-  const { opportunities, loading: opportunitiesLoading } = useOpportunities()
-  const { tasks, loading: tasksLoading } = useTasks()
+export default function CRMPage() {
+  const { companies, contacts, opportunities, tasks, fetchCompanies, fetchContacts, fetchOpportunities, fetchTasks } = useSupabase()
+  const [loading, setLoading] = useState(true)
 
-  const loading = companiesLoading || contactsLoading || opportunitiesLoading || tasksLoading
-
-  // Calcular estadísticas
-  const totalCompanies = companies.length
-  const activeCompanies = companies.filter(c => c.status === 'active').length
-  const totalContacts = contacts.length
-  const totalOpportunities = opportunities.length
-  const openOpportunities = opportunities.filter(o => o.status === 'open').length
-  const pendingTasks = tasks.filter(t => t.status === 'pending').length
-  const completedTasks = tasks.filter(t => t.status === 'completed').length
-
-  // Calcular valor total de oportunidades
-  const totalOpportunityValue = opportunities
-    .filter(o => o.amount && o.status === 'open')
-    .reduce((sum, o) => sum + (o.amount || 0), 0)
-
-  // Tareas de hoy
-  const today = new Date()
-  const tasksToday = tasks.filter(task => {
-    if (!task.due_date) return false
-    const dueDate = new Date(task.due_date)
-    return dueDate.toDateString() === today.toDateString()
-  })
-
-  // Oportunidades con mayor probabilidad
-  const highProbabilityOpportunities = opportunities
-    .filter(o => o.probability >= 70 && o.status === 'open')
-    .slice(0, 5)
+  useEffect(() => {
+    const loadData = async () => {
+      await Promise.all([
+        fetchCompanies(),
+        fetchContacts(),
+        fetchOpportunities(),
+        fetchTasks()
+      ])
+      setLoading(false)
+    }
+    loadData()
+  }, [fetchCompanies, fetchContacts, fetchOpportunities, fetchTasks])
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-lg">Cargando dashboard...</div>
-      </div>
-    )
+    return <div className="p-6">Cargando...</div>
   }
 
+  const totalCompanies = companies.length
+  const totalContacts = contacts.length
+  const totalOpportunities = opportunities.length
+  const completedTasks = tasks.filter(task => task.status === 'completed').length
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard CRM</h1>
-          <p className="text-muted-foreground">
-            Bienvenido de vuelta, {user?.email}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild>
-            <Link href="/crm/companies/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva Empresa
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/crm/contacts/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Contacto
-            </Link>
-          </Button>
-        </div>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Dashboard CRM</h1>
+        <Button>Nueva Oportunidad</Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Empresas</CardTitle>
@@ -95,7 +57,7 @@ export default function CRMDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{totalCompanies}</div>
             <p className="text-xs text-muted-foreground">
-              {activeCompanies} activas
+              Total de empresas registradas
             </p>
           </CardContent>
         </Card>
@@ -108,7 +70,7 @@ export default function CRMDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{totalContacts}</div>
             <p className="text-xs text-muted-foreground">
-              Total de contactos
+              Contactos activos
             </p>
           </CardContent>
         </Card>
@@ -119,143 +81,79 @@ export default function CRMDashboard() {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{openOpportunities}</div>
+            <div className="text-2xl font-bold">{totalOpportunities}</div>
             <p className="text-xs text-muted-foreground">
-              {totalOpportunities} totales
+              Oportunidades abiertas
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tareas</CardTitle>
-            <CheckSquare className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Tareas Completadas</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingTasks}</div>
+            <div className="text-2xl font-bold">{completedTasks}</div>
             <p className="text-xs text-muted-foreground">
-              {completedTasks} completadas
+              De {tasks.length} tareas totales
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Revenue Card */}
+      {/* Recent Opportunities */}
       <Card>
         <CardHeader>
-          <CardTitle>Valor Total de Oportunidades</CardTitle>
-          <CardDescription>
-            Suma de todas las oportunidades abiertas
-          </CardDescription>
+          <CardTitle>Oportunidades Recientes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">
-            ${totalOpportunityValue.toLocaleString()}
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <TrendingUp className="mr-1 h-4 w-4" />
-            Oportunidades activas
+          <div className="space-y-4">
+            {opportunities.slice(0, 5).map((opportunity) => (
+              <div key={opportunity.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex-1">
+                  <h3 className="font-semibold">{opportunity.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    ${opportunity.value?.toLocaleString()} • {opportunity.stage}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge variant={
+                    opportunity.stage === 'closed_won' ? 'default' :
+                    opportunity.stage === 'closed_lost' ? 'destructive' :
+                    opportunity.stage === 'proposal' ? 'secondary' : 'outline'
+                  }>
+                    {opportunity.stage === 'lead' && <Clock className="h-3 w-3 mr-1" />}
+                    {opportunity.stage === 'qualified' && <AlertCircle className="h-3 w-3 mr-1" />}
+                    {opportunity.stage === 'proposal' && <Target className="h-3 w-3 mr-1" />}
+                    {opportunity.stage === 'closed_won' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                    {opportunity.stage}
+                  </Badge>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Tareas de Hoy */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tareas de Hoy</CardTitle>
-            <CardDescription>
-              Tareas programadas para hoy
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {tasksToday.length === 0 ? (
-              <p className="text-muted-foreground">No hay tareas programadas para hoy</p>
-            ) : (
-              <div className="space-y-3">
-                {tasksToday.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{task.title}</p>
-                      <p className="text-sm text-muted-foreground">{task.description}</p>
-                    </div>
-                    <Badge variant={task.priority === 'high' ? 'destructive' : 'secondary'}>
-                      {task.priority}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Oportunidades de Alta Probabilidad */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Oportunidades de Alta Probabilidad</CardTitle>
-            <CardDescription>
-              Oportunidades con 70%+ de probabilidad
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {highProbabilityOpportunities.length === 0 ? (
-              <p className="text-muted-foreground">No hay oportunidades de alta probabilidad</p>
-            ) : (
-              <div className="space-y-3">
-                {highProbabilityOpportunities.map((opportunity) => (
-                  <div key={opportunity.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{opportunity.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {opportunity.companies?.name}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">${opportunity.amount?.toLocaleString()}</p>
-                      <Badge variant="outline">{opportunity.probability}%</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
+      {/* Recent Companies */}
       <Card>
         <CardHeader>
-          <CardTitle>Acciones Rápidas</CardTitle>
-          <CardDescription>
-            Acceso rápido a las funciones más utilizadas
-          </CardDescription>
+          <CardTitle>Empresas Recientes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/crm/companies">
-                <Building2 className="h-6 w-6 mb-2" />
-                Empresas
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/crm/contacts">
-                <Users className="h-6 w-6 mb-2" />
-                Contactos
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/crm/opportunities">
-                <Target className="h-6 w-6 mb-2" />
-                Oportunidades
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-20 flex-col">
-              <Link href="/crm/tasks">
-                <CheckSquare className="h-6 w-6 mb-2" />
-                Tareas
-              </Link>
-            </Button>
+          <div className="space-y-4">
+            {companies.slice(0, 5).map((company) => (
+              <div key={company.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex-1">
+                  <h3 className="font-semibold">{company.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {company.industry} • {company.size} empleados
+                  </p>
+                </div>
+                <Badge variant="outline">{company.status}</Badge>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
