@@ -67,9 +67,9 @@ export interface Opportunity {
   description?: string
   company_id: string
   contact_id?: string
-  value?: number
+  amount?: number
   currency: string
-  stage: 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
+  stage: 'sourcing' | 'initial_contact' | 'nda' | 'teaser' | 'ioi' | 'loi' | 'due_diligence' | 'spa_negotiation' | 'closing' | 'closed_won' | 'closed_lost' | 'on_hold'
   probability: number
   expected_close_date?: string
   actual_close_date?: string
@@ -82,6 +82,32 @@ export interface Opportunity {
   assigned_to?: string
   companies?: { id: string; name: string }
   contacts?: { id: string; first_name: string; last_name: string }
+  
+  // Campos específicos M&A
+  deal_type?: 'acquisition' | 'divestiture' | 'merger' | 'joint_venture' | 'ipo' | 'private_equity' | 'debt_financing'
+  transaction_size_min?: number
+  transaction_size_max?: number
+  industry_sector?: string
+  ebitda?: number
+  revenue?: number
+  ebitda_multiple?: number
+  revenue_multiple?: number
+  geography?: string
+  deal_rationale?: string
+  key_risks?: string
+  timeline_target_close?: string
+  nda_signed?: boolean
+  nda_signed_date?: string
+  teaser_sent?: boolean
+  teaser_sent_date?: string
+  ioi_received?: boolean
+  ioi_received_date?: string
+  loi_signed?: boolean
+  loi_signed_date?: string
+  due_diligence_started?: boolean
+  due_diligence_started_date?: string
+  spa_signed?: boolean
+  spa_signed_date?: string
 }
 
 export interface Task {
@@ -139,6 +165,64 @@ export interface Activity {
   duration_minutes?: number
   activity_date: string
   created_by?: string
+  created_at: string
+  updated_at: string
+}
+
+// Nuevos tipos para las tablas M&A especializadas
+export interface MADocument {
+  id: string
+  opportunity_id: string
+  document_type: 'nda' | 'teaser' | 'cim' | 'financial_statements' | 'tax_returns' | 'legal_docs' | 'contracts' | 'ioi' | 'loi' | 'spa' | 'closing_docs'
+  document_name: string
+  file_path?: string
+  uploaded_by?: string
+  uploaded_at: string
+  is_required: boolean
+  is_received: boolean
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface DueDiligenceItem {
+  id: string
+  opportunity_id: string
+  category: 'financial' | 'legal' | 'commercial' | 'operational' | 'hr' | 'it' | 'environmental' | 'regulatory'
+  item_name: string
+  description?: string
+  is_completed: boolean
+  completed_by?: string
+  completed_at?: string
+  priority: 'low' | 'medium' | 'high' | 'critical'
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Valuation {
+  id: string
+  opportunity_id: string
+  valuation_method: 'dcf' | 'comparable_companies' | 'precedent_transactions' | 'asset_based' | 'other'
+  enterprise_value?: number
+  equity_value?: number
+  ebitda_multiple?: number
+  revenue_multiple?: number
+  assumptions?: string
+  notes?: string
+  created_by?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface DealParty {
+  id: string
+  opportunity_id: string
+  party_type: 'buyer' | 'seller' | 'advisor' | 'lender' | 'legal_counsel'
+  company_id?: string
+  contact_id?: string
+  role_description?: string
+  is_primary: boolean
   created_at: string
   updated_at: string
 } 

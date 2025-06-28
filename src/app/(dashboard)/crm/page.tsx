@@ -9,7 +9,11 @@ import {
   Target,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  TrendingUp,
+  FileText,
+  Handshake,
+  DollarSign
 } from 'lucide-react'
 import { useSupabase } from '@/hooks/use-supabase'
 import { useEffect, useState } from 'react'
@@ -37,101 +41,144 @@ export default function CRMPage() {
 
   const totalCompanies = companies.length
   const totalContacts = contacts.length
-  const totalOpportunities = opportunities.length
+  const totalDeals = opportunities.length
   const completedTasks = tasks.filter(task => task.status === 'completed').length
+  
+  // Calcular estadísticas M&A específicas
+  const totalDealValue = opportunities.reduce((sum, deal) => sum + (deal.amount || 0), 0)
+  const activeDeals = opportunities.filter(deal => deal.status === 'open').length
+  const closedDeals = opportunities.filter(deal => deal.stage === 'closed_won').length
+
+  // Función para obtener el badge del stage M&A
+  const getStageInfo = (stage: string) => {
+    const stageMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
+      'sourcing': { label: 'Sourcing', variant: 'outline', icon: Target },
+      'initial_contact': { label: 'Contacto Inicial', variant: 'outline', icon: Users },
+      'nda': { label: 'NDA', variant: 'secondary', icon: FileText },
+      'teaser': { label: 'Teaser', variant: 'secondary', icon: FileText },
+      'ioi': { label: 'IOI', variant: 'secondary', icon: Handshake },
+      'loi': { label: 'LOI', variant: 'default', icon: FileText },
+      'due_diligence': { label: 'Due Diligence', variant: 'default', icon: AlertCircle },
+      'spa_negotiation': { label: 'Negociación SPA', variant: 'default', icon: Handshake },
+      'closing': { label: 'Closing', variant: 'default', icon: CheckCircle2 },
+      'closed_won': { label: 'Cerrado Exitoso', variant: 'default', icon: CheckCircle2 },
+      'closed_lost': { label: 'Perdido', variant: 'destructive', icon: AlertCircle },
+      'on_hold': { label: 'En Pausa', variant: 'outline', icon: Clock }
+    }
+    return stageMap[stage] || { label: stage, variant: 'outline' as const, icon: Target }
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Dashboard CRM</h1>
-        <Button>Nueva Oportunidad</Button>
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard M&A</h1>
+          <p className="text-muted-foreground">Gestión especializada de operaciones de M&A</p>
+        </div>
+        <Button>Nuevo Deal M&A</Button>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Empresas</CardTitle>
+            <CardTitle className="text-sm font-medium">Empresas Target</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalCompanies}</div>
             <p className="text-xs text-muted-foreground">
-              Total de empresas registradas
+              Empresas en pipeline
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Contactos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Deals Activos</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalContacts}</div>
+            <div className="text-2xl font-bold">{activeDeals}</div>
             <p className="text-xs text-muted-foreground">
-              Contactos activos
+              De {totalDeals} deals totales
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Oportunidades</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Valor Total Pipeline</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalOpportunities}</div>
+            <div className="text-2xl font-bold">${(totalDealValue / 1000000).toFixed(1)}M</div>
             <p className="text-xs text-muted-foreground">
-              Oportunidades abiertas
+              En {activeDeals} deals activos
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tareas Completadas</CardTitle>
+            <CardTitle className="text-sm font-medium">Deals Cerrados</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedTasks}</div>
+            <div className="text-2xl font-bold">{closedDeals}</div>
             <p className="text-xs text-muted-foreground">
-              De {tasks.length} tareas totales
+              Transacciones exitosas
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Opportunities */}
+      {/* Recent Deals */}
       <Card>
         <CardHeader>
-          <CardTitle>Oportunidades Recientes</CardTitle>
+          <CardTitle>Deals M&A Recientes</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {opportunities.slice(0, 5).map((opportunity) => (
-              <div key={opportunity.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <h3 className="font-semibold">{opportunity.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    ${opportunity.value?.toLocaleString()} • {opportunity.stage}
-                  </p>
+            {opportunities.slice(0, 5).map((deal) => {
+              const stageInfo = getStageInfo(deal.stage)
+              const Icon = stageInfo.icon
+              
+              return (
+                <div key={deal.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{deal.title}</h3>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+                      <span>${(deal.amount || 0).toLocaleString()}</span>
+                      {deal.deal_type && (
+                        <Badge variant="outline" className="text-xs">
+                          {deal.deal_type === 'acquisition' && 'Adquisición'}
+                          {deal.deal_type === 'divestiture' && 'Desinversión'}
+                          {deal.deal_type === 'merger' && 'Fusión'}
+                          {deal.deal_type === 'joint_venture' && 'Joint Venture'}
+                          {deal.deal_type === 'private_equity' && 'Private Equity'}
+                          {deal.deal_type === 'debt_financing' && 'Financiación'}
+                          {deal.deal_type === 'ipo' && 'IPO'}
+                        </Badge>
+                      )}
+                      {deal.industry_sector && (
+                        <span>{deal.industry_sector}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant={stageInfo.variant}>
+                      <Icon className="h-3 w-3 mr-1" />
+                      {stageInfo.label}
+                    </Badge>
+                    <div className="text-right text-sm">
+                      <div className="font-semibold">{deal.probability}%</div>
+                      <div className="text-xs text-muted-foreground">probabilidad</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant={
-                    opportunity.stage === 'closed_won' ? 'default' :
-                    opportunity.stage === 'closed_lost' ? 'destructive' :
-                    opportunity.stage === 'proposal' ? 'secondary' : 'outline'
-                  }>
-                    {opportunity.stage === 'lead' && <Clock className="h-3 w-3 mr-1" />}
-                    {opportunity.stage === 'qualified' && <AlertCircle className="h-3 w-3 mr-1" />}
-                    {opportunity.stage === 'proposal' && <Target className="h-3 w-3 mr-1" />}
-                    {opportunity.stage === 'closed_won' && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                    {opportunity.stage}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </CardContent>
       </Card>
@@ -139,7 +186,7 @@ export default function CRMPage() {
       {/* Recent Companies */}
       <Card>
         <CardHeader>
-          <CardTitle>Empresas Recientes</CardTitle>
+          <CardTitle>Empresas Target Recientes</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -147,11 +194,24 @@ export default function CRMPage() {
               <div key={company.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
                   <h3 className="font-semibold">{company.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {company.industry} • {company.size} empleados
-                  </p>
+                  <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+                    <span>{company.industry}</span>
+                    {company.employee_count && (
+                      <span>{company.employee_count} empleados</span>
+                    )}
+                    {company.annual_revenue && (
+                      <span>${(company.annual_revenue / 1000000).toFixed(1)}M revenue</span>
+                    )}
+                  </div>
                 </div>
-                <Badge variant="outline">{company.status}</Badge>
+                <Badge variant={
+                  company.status === 'active' ? 'default' :
+                  company.status === 'prospect' ? 'secondary' : 'outline'
+                }>
+                  {company.status === 'active' && 'Activa'}
+                  {company.status === 'prospect' && 'Prospecto'}
+                  {company.status === 'inactive' && 'Inactiva'}
+                </Badge>
               </div>
             ))}
           </div>
