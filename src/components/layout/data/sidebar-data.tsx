@@ -17,7 +17,7 @@ import {
   IconUserOff,
   IconUsers,
 } from "@tabler/icons-react"
-import { AudioWaveform, GalleryVerticalEnd } from "lucide-react"
+import { AudioWaveform, GalleryVerticalEnd, Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/logo"
 import { type SidebarData } from "../types"
@@ -68,6 +68,11 @@ export const sidebarData: SidebarData = {
               url: "/dashboard-3",
             },
           ],
+        },
+        {
+          title: "CRM M&A",
+          url: "/crm",
+          icon: Building2,
         },
         {
           title: "Tasks",
