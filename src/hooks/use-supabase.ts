@@ -24,7 +24,7 @@ export function useSupabase() {
 
       setCompanies(data || [])
       return data || []
-    } catch (error) {
+    } catch (_error) {
       // Error in fetchCompanies
       return []
     } finally {
@@ -47,7 +47,7 @@ export function useSupabase() {
 
       setCompanies(prev => [data, ...prev])
       return data
-    } catch (error) {
+    } catch (_error) {
       // Error in createCompany
       return null
     }
@@ -75,7 +75,7 @@ export function useSupabase() {
 
       setContacts(data || [])
       return data || []
-    } catch (error) {
+    } catch (_error) {
       // Error in fetchContacts
       return []
     } finally {
@@ -104,7 +104,7 @@ export function useSupabase() {
 
       setContacts(prev => [data, ...prev])
       return data
-    } catch (error) {
+    } catch (_error) {
       // Error in createContact
       return null
     }
@@ -137,7 +137,7 @@ export function useSupabase() {
 
       setOpportunities(data || [])
       return data || []
-    } catch (error) {
+    } catch (_error) {
       // Error in fetchOpportunities
       return []
     } finally {
@@ -171,7 +171,7 @@ export function useSupabase() {
 
       setOpportunities(prev => [data, ...prev])
       return data
-    } catch (error) {
+    } catch (_error) {
       // Error in createOpportunity
       return null
     }
@@ -208,7 +208,7 @@ export function useSupabase() {
 
       setTasks(data || [])
       return data || []
-    } catch (error) {
+    } catch (_error) {
       // Error in fetchTasks
       return []
     } finally {
@@ -246,7 +246,7 @@ export function useSupabase() {
 
       setTasks(prev => [data, ...prev])
       return data
-    } catch (error) {
+    } catch (_error) {
       // Error in createTask
       return null
     }
@@ -283,7 +283,7 @@ export function useSupabase() {
 
       setTasks(prev => prev.map(task => task.id === taskId ? data : task))
       return data
-    } catch (error) {
+    } catch (_error) {
       // Error in updateTaskStatus
       return null
     }
