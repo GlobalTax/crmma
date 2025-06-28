@@ -187,9 +187,9 @@ export default function CRMPage() {
     }).format(value)
   }
 
-  const handleDealWizardSubmit = (data: unknown) => {
+  const handleDealWizardSubmit = (_data: unknown) => {
     // TODO: Implementar lógica para guardar el deal en la DB
-    // console.log('New deal data:', data)
+    // console.log('New deal data:', _data)
     setShowDealWizard(false)
   }
 
