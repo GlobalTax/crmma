@@ -10,7 +10,7 @@ import { useSupabase } from '@/hooks/use-supabase'
 import { DealCreationWizard } from './components/deal-creation-wizard'
 import { DealPipeline } from './components/deal-pipeline'
 
-interface Company {
+interface _Company {
   id: string
   name: string
   industry: string
@@ -18,7 +18,7 @@ interface Company {
   created_at: string
 }
 
-interface Opportunity {
+interface _Opportunity {
   id: string
   title: string
   stage: string
@@ -45,7 +45,7 @@ interface Deal {
 export default function CRMPage() {
   const [showDealWizard, setShowDealWizard] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
-  const { companies, contacts, opportunities, tasks, fetchCompanies, fetchContacts, fetchOpportunities, fetchTasks } = useSupabase()
+  const { companies, contacts: _contacts, opportunities, tasks: _tasks, fetchCompanies, fetchContacts, fetchOpportunities, fetchTasks } = useSupabase()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -187,20 +187,22 @@ export default function CRMPage() {
     }).format(value)
   }
 
-  const handleDealWizardSubmit = (data: any) => {
-    console.log('New deal data:', data)
-    // Aquí implementarías la lógica para guardar el deal en la DB
+  const handleDealWizardSubmit = (data: unknown) => {
+    // TODO: Implementar lógica para guardar el deal en la DB
+    // console.log('New deal data:', data)
     setShowDealWizard(false)
   }
 
   const handleDealClick = (deal: Deal) => {
-    console.log('Deal clicked:', deal)
-    // Aquí implementarías la navegación al detalle del deal
+    // TODO: Implementar navegación al detalle del deal
+    // console.log('Deal clicked:', deal)
+    return deal
   }
 
   const handleStageChange = (dealId: string, newStage: string) => {
-    console.log('Stage change:', dealId, newStage)
-    // Aquí implementarías la lógica para cambiar el stage del deal
+    // TODO: Implementar lógica para cambiar el stage del deal
+    // console.log('Stage change:', dealId, newStage)
+    return { dealId, newStage }
   }
 
   return (

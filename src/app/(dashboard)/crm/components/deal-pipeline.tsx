@@ -85,10 +85,10 @@ const pipelineStages = [
 interface DealPipelineProps {
   deals: Deal[]
   onDealClick: (deal: Deal) => void
-  onStageChange: (dealId: string, newStage: string) => void
+  onStageChange?: (dealId: string, newStage: string) => void
 }
 
-export function DealPipeline({ deals, onDealClick, onStageChange }: DealPipelineProps) {
+export function DealPipeline({ deals, onDealClick, onStageChange: _onStageChange }: DealPipelineProps) {
   const [selectedDeal, setSelectedDeal] = useState<string | null>(null)
 
   const getDealsByStage = (stageId: string) => {

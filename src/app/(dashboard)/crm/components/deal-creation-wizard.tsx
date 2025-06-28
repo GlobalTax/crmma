@@ -14,7 +14,6 @@ import {
   DollarSign, 
   FileText, 
   Target, 
-  Users, 
   Calendar,
   CheckCircle2,
   ArrowRight,
