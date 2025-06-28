@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase, type Profile, type Company, type Contact, type Opportunity, type Task, type Deal, type Activity } from '@/lib/supabase'
+import { supabase, type Profile, type Company, type Contact, type Opportunity, type Task } from '@/lib/supabase'
 
 // Hook para obtener el perfil del usuario actual
 export function useProfile() {
@@ -27,7 +27,7 @@ export function useProfile() {
       if (error) throw error
       setProfile(data)
     } catch (error) {
-      console.error('Error loading profile:', error)
+      // Error loading profile
     } finally {
       setLoading(false)
     }
@@ -55,7 +55,7 @@ export function useCompanies() {
       if (error) throw error
       setCompanies(data || [])
     } catch (error) {
-      console.error('Error loading companies:', error)
+      // Error loading companies
     } finally {
       setLoading(false)
     }
@@ -73,7 +73,7 @@ export function useCompanies() {
       setCompanies(prev => [data, ...prev])
       return data
     } catch (error) {
-      console.error('Error creating company:', error)
+      // Error creating company
       throw error
     }
   }
@@ -91,7 +91,7 @@ export function useCompanies() {
       setCompanies(prev => prev.map(company => company.id === id ? data : company))
       return data
     } catch (error) {
-      console.error('Error updating company:', error)
+      // Error updating company
       throw error
     }
   }
@@ -106,7 +106,7 @@ export function useCompanies() {
       if (error) throw error
       setCompanies(prev => prev.filter(company => company.id !== id))
     } catch (error) {
-      console.error('Error deleting company:', error)
+      // Error deleting company
       throw error
     }
   }
@@ -143,7 +143,7 @@ export function useContacts() {
       if (error) throw error
       setContacts(data || [])
     } catch (error) {
-      console.error('Error loading contacts:', error)
+      // Error loading contacts
     } finally {
       setLoading(false)
     }
@@ -164,7 +164,7 @@ export function useContacts() {
       setContacts(prev => [data, ...prev])
       return data
     } catch (error) {
-      console.error('Error creating contact:', error)
+      // Error creating contact
       throw error
     }
   }
@@ -185,7 +185,7 @@ export function useContacts() {
       setContacts(prev => prev.map(contact => contact.id === id ? data : contact))
       return data
     } catch (error) {
-      console.error('Error updating contact:', error)
+      // Error updating contact
       throw error
     }
   }
@@ -200,7 +200,7 @@ export function useContacts() {
       if (error) throw error
       setContacts(prev => prev.filter(contact => contact.id !== id))
     } catch (error) {
-      console.error('Error deleting contact:', error)
+      // Error deleting contact
       throw error
     }
   }
@@ -238,7 +238,7 @@ export function useOpportunities() {
       if (error) throw error
       setOpportunities(data || [])
     } catch (error) {
-      console.error('Error loading opportunities:', error)
+      // Error loading opportunities
     } finally {
       setLoading(false)
     }
@@ -260,7 +260,7 @@ export function useOpportunities() {
       setOpportunities(prev => [data, ...prev])
       return data
     } catch (error) {
-      console.error('Error creating opportunity:', error)
+      // Error creating opportunity
       throw error
     }
   }
@@ -282,7 +282,7 @@ export function useOpportunities() {
       setOpportunities(prev => prev.map(opportunity => opportunity.id === id ? data : opportunity))
       return data
     } catch (error) {
-      console.error('Error updating opportunity:', error)
+      // Error updating opportunity
       throw error
     }
   }
@@ -297,7 +297,7 @@ export function useOpportunities() {
       if (error) throw error
       setOpportunities(prev => prev.filter(opportunity => opportunity.id !== id))
     } catch (error) {
-      console.error('Error deleting opportunity:', error)
+      // Error deleting opportunity
       throw error
     }
   }
@@ -336,7 +336,7 @@ export function useTasks() {
       if (error) throw error
       setTasks(data || [])
     } catch (error) {
-      console.error('Error loading tasks:', error)
+      // Error loading tasks
     } finally {
       setLoading(false)
     }
@@ -359,7 +359,7 @@ export function useTasks() {
       setTasks(prev => [data, ...prev])
       return data
     } catch (error) {
-      console.error('Error creating task:', error)
+      // Error creating task
       throw error
     }
   }
@@ -382,7 +382,7 @@ export function useTasks() {
       setTasks(prev => prev.map(task => task.id === id ? data : task))
       return data
     } catch (error) {
-      console.error('Error updating task:', error)
+      // Error updating task
       throw error
     }
   }
@@ -397,7 +397,7 @@ export function useTasks() {
       if (error) throw error
       setTasks(prev => prev.filter(task => task.id !== id))
     } catch (error) {
-      console.error('Error deleting task:', error)
+      // Error deleting task
       throw error
     }
   }

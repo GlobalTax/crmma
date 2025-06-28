@@ -10,12 +10,8 @@ import {
   Users, 
   Target, 
   CheckSquare, 
-  TrendingUp, 
-  DollarSign,
-  Plus,
-  Calendar,
-  Phone,
-  Mail
+  TrendingUp,
+  Plus
 } from "lucide-react"
 import Link from "next/link"
 
@@ -34,7 +30,6 @@ export default function CRMDashboard() {
   const totalContacts = contacts.length
   const totalOpportunities = opportunities.length
   const openOpportunities = opportunities.filter(o => o.status === 'open').length
-  const totalTasks = tasks.length
   const pendingTasks = tasks.filter(t => t.status === 'pending').length
   const completedTasks = tasks.filter(t => t.status === 'completed').length
 
