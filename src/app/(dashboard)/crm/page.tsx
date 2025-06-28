@@ -40,9 +40,9 @@ export default function CRMPage() {
   }
 
   const totalCompanies = companies.length
-  const totalContacts = contacts.length
+  const _totalContacts = contacts.length
   const totalDeals = opportunities.length
-  const completedTasks = tasks.filter(task => task.status === 'completed').length
+  const _completedTasks = tasks.filter(task => task.status === 'completed').length
   
   // Calcular estadísticas M&A específicas
   const totalDealValue = opportunities.reduce((sum, deal) => sum + (deal.amount || 0), 0)
@@ -51,7 +51,7 @@ export default function CRMPage() {
 
   // Función para obtener el badge del stage M&A
   const getStageInfo = (stage: string) => {
-    const stageMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
+    const stageMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ComponentType<{ className?: string }> }> = {
       'sourcing': { label: 'Sourcing', variant: 'outline', icon: Target },
       'initial_contact': { label: 'Contacto Inicial', variant: 'outline', icon: Users },
       'nda': { label: 'NDA', variant: 'secondary', icon: FileText },
